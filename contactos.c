@@ -1,89 +1,123 @@
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
+#include <stdlib.h>
 
-#define TAMANO_USU 10
+//Tamaño del array de los contactos del usuario.
+#define TAMANO_CONTACTO 10
 
-int posicion = 0;
+//Variable global que indica el indice de contactos creados
+int posicionContactos = 0;
 
+//Estructura del registro Contacto.
 struct Contacto
 {
-    int codigo;
+    int codigo; //Falta implementar un codigo autoincremental
     char nombre[40];
     char apellido[40];
     char referencia[40];
     char numeroTelefono[12];
 };
 
+//Definición de la estructura Contacto
+typedef struct Contacto Contacto;
+
+//Estructura del registro Usuario.
 struct Usuario
 {
-    int codigo;
+    int codigo; //Falta implementar un codigo autoincremental
     char nombre[40];
     char apellido[40];
-    char fechaNacimiento[100];
-    struct Contacto contacto[TAMANO_USU];
+    char fechaNacimiento[10];
+    Contacto contacto[TAMANO_CONTACTO];
 };
 
-struct Contacto registrarContacto()
+//Definición de la estructura Usuario
+typedef struct Usuario Usuario;
+
+//Procedimiento usado como utilidad para eliminar los saltos de linea que genera el fgets
+void eliminarSaltoLinea(char *cadena){
+    if ((strlen(cadena) > 0) && (cadena[strlen(cadena) - 1] == '\n'))
+    {
+        //Eliminamos la ultima posicion la cual almacena el fgets como un salto de linea y se produce dos veces con el printf
+        cadena[strlen(cadena) - 1] = '\0';
+    }
+}
+
+//Función que retorna un registro Contacto
+Contacto registrarContacto()
 {
 
-    struct Contacto contacto;
+    Contacto contacto;
 
     printf("\nIngrese el codigo del contacto: ");
     scanf("%i", &contacto.codigo);
     fflush(stdin);
 
     printf("Ingrese el nombre: ");
-    scanf("%s", &contacto.nombre);
+    fgets(contacto.nombre, 40, stdin);
+    eliminarSaltoLinea(contacto.nombre);
     fflush(stdin);
 
     printf("Ingrese el apellido: ");
-    scanf("%s", &contacto.apellido);
+    fgets(contacto.apellido, 40, stdin);
+    eliminarSaltoLinea(contacto.apellido);
     fflush(stdin);
 
     printf("Ingrese la referencia: ");
-    scanf("%s", &contacto.referencia);
+    fgets(contacto.referencia, 40, stdin);
+    eliminarSaltoLinea(contacto.referencia);
     fflush(stdin);
 
     printf("Ingrese el numero de telefono: ");
-    scanf("%s", &contacto.numeroTelefono);
+    fgets(contacto.numeroTelefono, 12, stdin);
+    eliminarSaltoLinea(contacto.numeroTelefono);
     fflush(stdin);
 
     return contacto;
 }
 
-struct Usuario registrarUsuario()
+//Función que retorna un registro Usuario
+//FALTA MEJORAR LA IMPLEMENTACIÓN DE ESTA FUNCION Y LAS DEMAS PERTENECIENTES A LA ESTRUCTURA USUARIO
+Usuario registrarUsuario()
 {
-    struct Usuario usuario;
+    Usuario usuario;
 
-    printf("Ingrese el codigo del usuario: ");
+    printf("Ingresa tu codigo: ");
     scanf("%i", &usuario.codigo);
     fflush(stdin);
 
-    printf("Ingrese el nombre: ");
-    scanf("%s", &usuario.nombre);
+    printf("Ingrese tu nombre: ");
+    fgets(usuario.nombre, 40, stdin);
+    eliminarSaltoLinea(usuario.nombre);
     fflush(stdin);
 
-    printf("Ingrese el apellido: ");
-    scanf("%s", &usuario.apellido);
+    printf("Ingrese tu apellido: ");
+    fgets(usuario.apellido, 40, stdin);
+    eliminarSaltoLinea(usuario.apellido);
     fflush(stdin);
 
-    printf("Ingrese la fecha de nacimiento: ");
-    scanf("%s", &usuario.fechaNacimiento);
+    printf("Ingrese la fecha de tu nacimiento: ");
+    fgets(usuario.fechaNacimiento, 10, stdin);
+    eliminarSaltoLinea(usuario.fechaNacimiento);
     fflush(stdin);
 
     return usuario;
 }
 
-void editarContacto(struct Usuario *usuario, int codigoContacto)
+//Procedimiento que a traves de un puntero de tipo Usuario modifica los datos pertenecientes
+//al contacto identificado con el codigo proporcionado por el usuario
+void editarContacto(Usuario *usuario, int codigoContacto)
 {
     int existeContacto = 0;
-    for (int i = 0; i < posicion; i++)
+    //Buscamos si se encuentra el contacto a traves del codigo brindado por el usuaro
+    for (int i = 0; i < posicionContactos; i++)
     {
-        if (codigoContacto == (*usuario).contacto[i].codigo)
+        if (codigoContacto == usuario->contacto[i].codigo)
         {
             printf("Ingrese los nuevos datos del contacto: \n");
-            (*usuario).contacto[i] = registrarContacto();
+            //Si es encontrado, le solicita nuevamente los datos del contacto
+            usuario->contacto[i] = registrarContacto();
             printf("\nContacto editado correctamente.\n");
             existeContacto = 1;
         }
@@ -94,19 +128,23 @@ void editarContacto(struct Usuario *usuario, int codigoContacto)
     }
 }
 
-void eliminarContacto(struct Usuario *usuario, int codigoContacto)
+//Procedimiento que a traves de un puntero de tipo Usuario elimina el registro perteneciente
+//al contacto identificado con el codigo proporcionado por el usuario
+void eliminarContacto(Usuario *usuario, int codigoContacto)
 {
     int existeContacto = 0;
-    for (int i = 0; i < posicion; i++)
+    //Se busca al contacto
+    for (int i = 0; i < posicionContactos; i++)
     {
-        if (codigoContacto == (*usuario).contacto[i].codigo)
+        //Si se encuentra se hace un intercambio con las siguientes posiciones para eliminar ese registro
+        if (codigoContacto == usuario->contacto[i].codigo)
         {
-            for (int j = i; j < TAMANO_USU; j++)
+            for (int j = i; j < TAMANO_CONTACTO; j++)
             {
-                (*usuario).contacto[j] = (*usuario).contacto[j + 1];
+                usuario->contacto[j] = usuario->contacto[j + 1];
             }
             printf("\nContacto eliminado correctamente.\n");
-            posicion--;
+            posicionContactos--;
             existeContacto = 1;
         }
     }
@@ -116,19 +154,18 @@ void eliminarContacto(struct Usuario *usuario, int codigoContacto)
     }
 }
 
-void imprimirUsuario(struct Usuario usuario)
+//Imprime todos los contactos que tiene el usuario
+void imprimirUsuario(Usuario usuario)
 {
-    printf("\n%s, tus contactos son:\n", usuario.nombre);
-    for (int i = 0; i < posicion; i++)
+    printf("\n%s [beta], tus contactos son:\n", usuario.nombre);
+    for (int i = 0; i < posicionContactos; i++)
     {
         printf("Codigo: %i: Nombre: %s. Apellido: %s. Referencia: %s. Numero: %s\n", usuario.contacto[i].codigo, usuario.contacto[i].nombre, usuario.contacto[i].apellido, usuario.contacto[i].referencia, usuario.contacto[i].numeroTelefono);
     }
 }
 
-int main()
-{
-    struct Usuario usuario;
-    // usuario = registrarUsuario(); Obsoleto, falta agregar la lista de usuarios (tipo login)
+//Procedimiento que representa el menu principal del usuario [FALTAN AJUSTES]
+void menuPrincipal(Usuario usuario){
     int decision;
     int codigoUsuario;
 
@@ -141,8 +178,8 @@ int main()
         switch (decision)
         {
         case 1:
-            usuario.contacto[posicion] = registrarContacto(usuario);
-            posicion++;
+            usuario.contacto[posicionContactos] = registrarContacto(usuario);
+            posicionContactos++;
             printf("\nContacto agregado correctamente.\n");
             break;
         case 2:
@@ -167,6 +204,14 @@ int main()
         }
 
     } while (decision != 0);
+}
+
+int main()
+{
+    Usuario usuario;
+    usuario = registrarUsuario(); //Incompleto, falta agregar la lista de usuarios (tipo login)
+
+    menuPrincipal(usuario);
 
     return 0;
 }
